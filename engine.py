@@ -115,7 +115,7 @@ def excluded(pid, oid):
     """Real-life couples/family members are never set up with each other."""
     if not EXCLUDE:
         return False
-    people = store.snapshot("people")
+    people = store.read("people")
     u = lambda i: ((people.get(i) or {}).get("ig") or {}).get("username", "").lower()
     return frozenset((u(pid), u(oid))) in EXCLUDE
 
@@ -302,8 +302,20 @@ def date_newcomer(pid):
 
 
 # ---------------------------------------------------------------- 4. rankings
+_rank_cache = {}
+
+
 def ranking_for(pid):
-    db = store.snapshot()
+    key = (store.VERSION[0], pid)
+    if key not in _rank_cache:
+        if len(_rank_cache) > 500:
+            _rank_cache.clear()
+        _rank_cache[key] = _ranking_for(pid)
+    return _rank_cache[key]
+
+
+def _ranking_for(pid):
+    db = store.read()
     people = {k: v for k, v in db["people"].items() if v.get("status") == "ready"}
     mine, rows = db["scores"].get(pid, {}), []
     dates = {}

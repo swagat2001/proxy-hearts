@@ -75,11 +75,21 @@ def snapshot(key=None):
         return copy.deepcopy(db[key] if key else db)
 
 
+VERSION = [0]
+
+
 def mutate(fn):
     with _lock:
         out = fn(load())
+        VERSION[0] += 1
         touch()
         return out
+
+
+def read(key=None):
+    """Zero-copy view for read-only use (pages). Do not modify the result."""
+    db = load()
+    return db[key] if key else db
 
 
 def event(kind, text, **extra):

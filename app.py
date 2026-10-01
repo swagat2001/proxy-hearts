@@ -19,9 +19,9 @@ _mask = {"t": 0, "pairs": []}
 
 def _mask_pairs():
     """Real name / handle -> pseudonym, for the demo people only (people a visitor adds themselves are not masked)."""
-    if time.time() - _mask["t"] < 5:
+    if _mask.get("v") == store.VERSION[0]:
         return _mask["pairs"]
-    people = sorted(store.snapshot("people").values(), key=lambda p: p.get("created", 0))
+    people = sorted(store.read("people").values(), key=lambda p: p.get("created", 0))
     pairs, firsts = [], {}
     for i, p in enumerate([p for p in people if p.get("demo")], 1):
         alias = f"Person {i:02d}"
@@ -45,13 +45,23 @@ def _mask_pairs():
         if len(f) > 2:
             pairs.append((f, al.pop() if len(al) == 1 else "they"))
     pairs.sort(key=lambda x: -len(x[0]))
-    _mask.update(t=time.time(), pairs=pairs)
+    _mask.update(t=time.time(), v=store.VERSION[0], pairs=pairs)
     return pairs
 
 
+_rx = {"v": None, "rx": None, "map": {}}
+
+
 def mask_text(s):
-    for real, alias in _mask_pairs():
-        s = re.sub(r"(?<![\w])" + re.escape(real) + r"(?![\w])", alias, s, flags=re.I)
+    if _rx["v"] != store.VERSION[0] or _rx["rx"] is None:
+        pairs = _mask_pairs()
+        m = {}
+        for real, alias in pairs:
+            m.setdefault(real.lower(), alias)
+        _rx.update(v=store.VERSION[0], map=m, rx=re.compile(
+            r"(?<![\w])(" + "|".join(re.escape(r) for r, _ in pairs) + r")(?![\w])", re.I) if pairs else None)
+    if _rx["rx"] is not None:
+        s = _rx["rx"].sub(lambda mo: _rx["map"].get(mo.group(0).lower(), mo.group(0)), s)
     # drop flag/emoji left over from names like "Name 🇮🇳"
     return re.sub(r"(Person \d\d)\s*[\U0001F1E6-\U0001F1FF\u2600-\u27BF\U0001F300-\U0001FAFF]+", r"\1", s)
 
@@ -72,7 +82,7 @@ def img_filter(u):
 
 @app.route("/")
 def index():
-    db = store.snapshot()
+    db = store.read()
     people = sorted(db["people"].values(), key=lambda p: p.get("created", 0))
     done = [d for d in db["dates"].values() if d["status"] == "done"]
     return render_template("index.html", people=people, round=db["round"], n_dates=len(done))
@@ -122,8 +132,8 @@ def person_date(pid):
 
 @app.route("/person/<pid>")
 def person(pid):
-    p = store.snapshot("people").get(pid) or abort(404)
-    dates = [d for d in store.snapshot("dates").values() if pid in (d["a"], d["b"])]
+    p = store.read("people").get(pid) or abort(404)
+    dates = [d for d in store.read("dates").values() if pid in (d["a"], d["b"])]
     dates.sort(key=lambda d: d.get("created", 0))
     ranking = engine.ranking_for(pid) if p.get("status") == "ready" else []
     return render_template("person.html", p=p, a=p.get("analysis") or {}, dates=dates, ranking=ranking)
@@ -131,8 +141,8 @@ def person(pid):
 
 @app.route("/date/<did>")
 def date(did):
-    d = store.snapshot("dates").get(did) or abort(404)
-    people = store.snapshot("people")
+    d = store.read("dates").get(did) or abort(404)
+    people = store.read("people")
     return render_template("date.html", d=d, A=people[d["a"]], B=people[d["b"]])
 
 
@@ -143,7 +153,7 @@ def live():
 
 @app.route("/rankings")
 def rankings():
-    people = [p for p in store.snapshot("people").values() if p.get("status") == "ready"]
+    people = [p for p in store.read("people").values() if p.get("status") == "ready"]
     people.sort(key=lambda p: p["analysis"]["name"])
     return render_template("rankings.html", rows=[(p, engine.ranking_for(p["id"])[:5]) for p in people])
 
@@ -164,7 +174,7 @@ def api_status():
 @app.route("/api/events")
 def api_events():
     since = int(request.args.get("since", 0))
-    db = store.snapshot()
+    db = store.read()
     active = [{"id": d["id"], "a_name": d["a_name"], "b_name": d["b_name"], "status": d["status"],
                "venue": (d.get("plan") or {}).get("venue"), "last": (d["messages"][-1]["text"] if d["messages"] else "")}
               for d in db["dates"].values() if d["status"] in ("asking", "on_date", "debrief")]

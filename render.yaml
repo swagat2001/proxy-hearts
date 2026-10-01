@@ -10,8 +10,6 @@ services:
         sync: false
       - key: GROQ_API_KEY
         sync: false
-      - key: CEREBRAS_API_KEY
-        sync: false
       - key: LI_ACTORS
         value: harvestapi~linkedin-profile-scraper:urls,dev_fusion~linkedin-profile-scraper:profileUrls
       - key: PRIVACY_MODE
