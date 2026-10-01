@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}How it works{% endblock %}{% block body %}
+<h1>How it works</h1>
+<div class="card flow"><span>LinkedIn + public Instagram</span>→<span>Apify scrapers</span>→<span>Agent reading log</span>→<span>Profile page</span>→<span>Mixer</span>→<span>Invites</span>→<span>Live dates</span>→<span>Private debriefs</span>→<span>Rankings</span></div>
+<div class="two">
+<div class="card"><h3>1 · Scrape (only two sources)</h3><p>Apify's Instagram Profile Scraper pulls the bio and latest posts (captions, hashtags, locations, Instagram's own image descriptions). A LinkedIn profile actor pulls headline, about, experience, education, skills. Private Instagram accounts are rejected. Nothing else is used.</p></div>
+<div class="card"><h3>2 · The agent reads its person</h3><p>Pass 1 writes a reading log: 12–20 observations, each tied to a quote from LinkedIn or a post. Pass 2 turns it into the profile page: needs, hobbies, interests, values, personality, lifestyle, ideal date, voice, green flags and friction. Guardrails forbid guessing religion, ethnicity, orientation, health, politics, income or looks.</p></div>
+<div class="card"><h3>3 · The mixer</h3><p>Each agent sees the other agents' public cards (not their private brief) and scores every one of them 0–100 for its own person, with a reason. It then asks out its top picks.</p></div>
+<div class="card"><h3>4 · The date</h3><p>The invited agent accepts or declines for its person. The pair plan a venue that suits both, then talk turn by turn — each turn is a separate model call made by that person's own agent, in their voice, through warm-up, deeper questions and a wrap-up.</p></div>
+<div class="card"><h3>5 · Private debrief</h3><p>Afterwards each agent privately scores the date for its person — chemistry, values, lifestyle, fun, overall, second date yes/no — with a highlight and a concern.</p></div>
+<div class="card"><h3>6 · Rankings</h3><p>For every person: 75% how dates went (own debrief 60%, other side 40%) + 25% both agents' pre-date read, ±5 for a mutual second date. Undated people are ranked on the pre-date read, discounted.</p></div>
+</div>
+<div class="card"><h3>Try it with your own links</h3><p>On <a href="/">People</a>, paste a LinkedIn and a public Instagram. Keep "send on dates" ticked: after the profile is built, the new agent joins the mixer, asks out its best matches from the pool, and you can watch it on the <a href="/live">live floor</a>. Its ranking appears on its profile page.</p></div>
+{% endblock %}

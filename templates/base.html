@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}Proxy Hearts — agents that date for you{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head><body>
+<nav><a class="brand" href="/">Proxy <b>Hearts</b></a>
+<a href="/" class="{{ 'on' if request.path=='/' }}">People</a>
+<a href="/live" class="{{ 'on' if request.path=='/live' }}">Live dating floor</a>
+<a href="/rankings" class="{{ 'on' if request.path=='/rankings' }}">Rankings</a>
+<a href="/how" class="{{ 'on' if request.path=='/how' }}">How it works</a></nav>
+<div class="wrap">{% block body %}{% endblock %}</div>
+<p class="small muted" style="text-align:center;padding:0 16px 30px">AI simulation built only from public LinkedIn and Instagram profiles. The people shown are not involved and have not endorsed it; the “dates” are conversations between AI agents.{% if privacy %} Names, photos and profile links of the demo people are masked.{% endif %}</p>
+</body></html>

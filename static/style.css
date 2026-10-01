@@ -1,0 +1,40 @@
+:root{--bg:#120d10;--panel:#1c1519;--panel2:#251c21;--line:#3a2c33;--ink:#f6ece6;--muted:#b7a39c;--accent:#ff6b6b;--gold:#e8b86d;--good:#6fd39a;--r:16px}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Inter",system-ui,sans-serif}
+a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}
+h1,h2,h3{font-family:"Fraunces",Georgia,serif;font-weight:600;margin:.2em 0 .4em;line-height:1.15}
+h1{font-size:clamp(30px,5vw,48px)}h2{font-size:24px}h3{font-size:18px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px 80px}
+nav{display:flex;gap:18px;align-items:center;padding:16px;max-width:1120px;margin:0 auto;flex-wrap:wrap}
+nav .brand{font-family:"Fraunces",serif;font-size:22px;color:var(--ink);margin-right:auto}nav .brand b{color:var(--accent)}
+nav a{color:var(--muted)}nav a.on,nav a:hover{color:var(--ink);text-decoration:none}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin:14px 0}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.two{display:grid;gap:14px;grid-template-columns:1fr 1fr}@media(max-width:760px){.two{grid-template-columns:1fr}}
+.muted{color:var(--muted)}.small{font-size:13px}.tag{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:3px 10px;margin:3px 4px 3px 0;font-size:13px}
+.tag.hot{border-color:var(--accent);color:#ffd3d3}.tag.ok{border-color:var(--good);color:#c9f5da}
+input,textarea{width:100%;background:#0e0a0c;border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px;font:inherit}
+textarea{min-height:110px;font-family:ui-monospace,monospace;font-size:13px}
+label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 6px}
+.btn{display:inline-block;background:var(--accent);color:#1a0b0b;border:0;border-radius:999px;padding:11px 20px;font-weight:600;cursor:pointer;font:inherit;font-weight:600}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}.btn:hover{filter:brightness(1.08);text-decoration:none}
+.pcard{display:flex;gap:12px;align-items:center;color:var(--ink)}.pcard:hover{text-decoration:none}
+.av{width:52px;height:52px;border-radius:50%;object-fit:cover;background:var(--panel2);flex:none;border:2px solid var(--line)}
+.av.lg{width:110px;height:110px}.av.sm{width:34px;height:34px}
+.status{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--panel2)}
+.status.ready{color:var(--good)}.status.error{color:var(--accent)}.status.scraping,.status.analyzing,.status.queued{color:var(--gold)}
+.hero{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.list{margin:0;padding-left:18px}.list li{margin:6px 0}
+.ev{padding:8px 12px;border-bottom:1px solid var(--line);font-size:14px;animation:in .4s}
+@keyframes in{from{opacity:0;transform:translateY(-4px)}}
+.chat{display:flex;flex-direction:column;gap:10px}
+.bubble{max-width:78%;padding:10px 14px;border-radius:18px;background:var(--panel2);animation:in .4s}
+.bubble.b{align-self:flex-end;background:#3a1f26}.bubble .who{font-size:12px;color:var(--muted);margin-bottom:2px}
+.score{font-family:"Fraunces",serif;font-size:30px;color:var(--gold)}
+table{width:100%;border-collapse:collapse}td,th{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.bar{height:6px;background:var(--panel2);border-radius:9px;overflow:hidden;min-width:80px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--gold))}
+.obs{border-left:3px solid var(--line);padding:4px 0 4px 12px;margin:10px 0}.obs.li{border-color:#4a90d9}.obs.ig{border-color:#d9468f}
+.pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:6px;animation:p 1s infinite}
+@keyframes p{50%{opacity:.25}}
+.kpi{display:flex;gap:26px;flex-wrap:wrap}.kpi div b{display:block;font-family:"Fraunces",serif;font-size:28px}
+.flow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.flow span{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 12px}

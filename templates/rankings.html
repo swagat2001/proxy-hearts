@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Rankings{% endblock %}{% block body %}
+<h1>Who fits each person best</h1>
+<p class="muted">Fit = 75% how the date actually went (60% own agent's debrief, 40% the other agent's) + 25% the agents' pre-date read, ±5 for a mutual second date. People not dated yet are ranked on the pre-date read only (discounted). Open a person for their full list.</p>
+{% for p, top in rows %}
+<div class="card"><div class="pcard" style="margin-bottom:10px"><img class="av" src="{{ pic(p) }}"><div><a href="/person/{{ p.id }}"><b>{{ p.analysis.name }}</b></a><div class="small muted">{{ p.analysis.one_liner }}</div></div></div>
+<table>{% for r in top %}<tr><td style="width:30px">{{ loop.index }}</td><td><a href="/person/{{ r.id }}">{{ r.name }}</a> {% if r.second_date %}💞{% endif %}</td>
+<td style="width:160px"><b>{{ r.fit }}</b><div class="bar"><i style="width:{{ r.fit }}%"></i></div></td>
+<td class="small muted">{% if r.dated %}<a href="/date/{{ r.date_id }}">dated</a> — {{ r.verdict }}{% else %}{{ r.reason }}{% endif %}</td></tr>{% endfor %}</table></div>
+{% else %}<p class="muted">No ready agents yet.</p>{% endfor %}
+{% endblock %}

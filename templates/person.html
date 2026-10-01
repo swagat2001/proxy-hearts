@@ -1,0 +1,71 @@
+{% extends "base.html" %}{% block title %}{{ a.name or p.name or 'Profile' }} — Proxy Hearts{% endblock %}{% block body %}
+<div class="card hero">
+  <img class="av lg" src="{{ pic(p) }}" alt="">
+  <div style="flex:1;min-width:240px">
+    <h1 style="margin:0">{{ a.name or p.name or 'Reading…' }}</h1>
+    {% if a.one_liner %}<p style="font-size:18px;margin:.2em 0">{{ a.one_liner }}</p>{% endif %}
+    <p class="small muted">{% if p.li and not (privacy and p.demo) %}{{ p.li.headline }} · {{ p.li.location }}{% endif %}</p>
+    <p class="small">{% if privacy and p.demo %}<span class="muted">LinkedIn + Instagram read · identity masked</span>{% else %}<a href="{{ p.linkedin }}" target="_blank">LinkedIn ↗</a> · <a href="{{ p.instagram }}" target="_blank">Instagram ↗</a>{% endif %}
+    {% if p.ig %}· <span class="muted">{{ p.ig.posts|length }} posts read</span>{% endif %}</p>
+  </div>
+  <div>{% if p.status=='ready' %}
+    <form method="post" action="/person/{{ p.id }}/date"><button class="btn">Send agent on dates</button></form>
+    {% else %}<span class="status {{ p.status }}"><span class="pulse"></span>{{ p.step }}</span>{% endif %}
+  </div>
+</div>
+
+{% if p.status != 'ready' %}
+<p class="muted" id="wait">This page refreshes by itself while the agent works.</p>
+<script>setInterval(async()=>{const j=await (await fetch('/api/status')).json();const s=j.people['{{p.id}}'];if(s&&s.status!=='{{p.status}}')location.reload();else if(s)document.getElementById('wait').textContent=s.step},2500)</script>
+{% endif %}
+
+{% if a %}
+<div class="card"><h2>Who they are</h2><p>{{ a.summary }}</p>
+  <p>{% for t in (a.personality or {}).traits or [] %}<span class="tag">{{ t }}</span>{% endfor %}</p>
+  <p class="small muted"><b>Social energy:</b> {{ (a.personality or {}).social_energy }} · <b>Humor:</b> {{ (a.personality or {}).humor }} · <b>Agent confidence:</b> {{ a.confidence }}/100</p>
+</div>
+
+<div class="two">
+  <div class="card"><h2>Needs</h2><ul class="list">{% for n in a.needs or [] %}<li><b>{{ n.need }}</b><br><span class="small muted">{{ n.why }}</span></li>{% endfor %}</ul>
+    <p class="small"><b>Looking for:</b> {{ a.looking_for }}</p></div>
+  <div class="card"><h2>Hobbies</h2><ul class="list">{% for h in a.hobbies or [] %}<li><b>{{ h.name }}</b> <span class="small muted">— {{ h.evidence }}</span></li>{% endfor %}</ul></div>
+  <div class="card"><h2>Interests</h2><ul class="list">{% for h in a.interests or [] %}<li><b>{{ h.name }}</b> <span class="small muted">— {{ h.evidence }}</span></li>{% endfor %}</ul></div>
+  <div class="card"><h2>Values & lifestyle</h2><p>{% for v in a['values'] or [] %}<span class="tag ok">{{ v }}</span>{% endfor %}</p>
+    <p><b>Lifestyle:</b> {{ a.lifestyle }}</p><p><b>Career:</b> {{ a.career }}</p></div>
+  <div class="card"><h2>On a date</h2><p><b>Ideal first date:</b> {{ a.ideal_date }}</p><p><b>Talks like:</b> {{ a.communication_style }}</p>
+    <p class="bubble" style="max-width:100%">“{{ a.voice_sample }}”</p>
+    <p class="small"><b>Light them up with:</b> {% for h in a.conversation_hooks or [] %}<span class="tag">{{ h }}</span>{% endfor %}</p></div>
+  <div class="card"><h2>Green flags & friction</h2><p>{% for g in a.green_flags or [] %}<span class="tag ok">✓ {{ g }}</span>{% endfor %}</p>
+    <p>{% for g in a.possible_friction or [] %}<span class="tag hot">⚠ {{ g }}</span>{% endfor %}</p></div>
+</div>
+
+<div class="card"><h2>How the agent read {{ a.name }}</h2>
+  <p class="small muted">The agent's reading log — every observation is tied to one of the two sources.</p>
+  {% for o in (p.reading or {}).observations or [] %}
+    <div class="obs {{ 'li' if 'inked' in (o.source or '') else 'ig' }}"><span class="tag">{{ o.source }}</span> <i>“{{ o.evidence }}”</i><br>→ {{ o.insight }}</div>
+  {% endfor %}
+  {% if (p.reading or {}).patterns %}<h3>Patterns across both sources</h3><ul class="list">{% for x in p.reading.patterns %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+  {% if (p.reading or {}).gaps %}<h3>What the data doesn't say</h3><ul class="list small muted">{% for x in p.reading.gaps %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+</div>
+{% endif %}
+
+{% if dates %}
+<div class="card"><h2>Dates ({{ dates|length }})</h2><table>
+{% for d in dates %}{% set other = d.b_name if d.a==p.id else d.a_name %}
+<tr><td><a href="/date/{{ d.id }}">{{ other }}</a></td><td class="small muted">{{ (d.plan or {}).venue or '' }}</td>
+<td><span class="status">{{ d.status }}</span></td>
+<td>{% if d.reflection %}{{ d.reflection[p.id].overall }}/100 {% if d.reflection[p.id].second_date %}💞{% endif %}{% endif %}</td></tr>
+{% endfor %}</table></div>
+{% endif %}
+
+{% if ranking %}
+<div class="card"><h2>Who fits {{ a.name }} best</h2>
+<table><tr><th>#</th><th>Person</th><th>Fit</th><th>Basis</th></tr>
+{% for r in ranking %}<tr><td>{{ loop.index }}</td>
+<td><a class="pcard" href="/person/{{ r.id }}"><img class="av sm" src="{{ pic(r) }}"> {{ r.name }}</a></td>
+<td style="width:170px"><b>{{ r.fit }}</b><div class="bar"><i style="width:{{ r.fit }}%"></i></div></td>
+<td class="small">{% if r.dated %}<a href="/date/{{ r.date_id }}">Dated</a> · me {{ r.my_overall }} / them {{ r.their_overall }} {% if r.second_date %}💞 both want a 2nd date{% endif %}<br><span class="muted">{{ r.verdict }}</span>
+{% elif r.declined %}<a href="/date/{{ r.date_id }}">Invite declined</a>{% else %}<span class="muted">Mixer read: {{ r.reason }}</span>{% endif %}</td></tr>{% endfor %}
+</table></div>
+{% endif %}
+{% endblock %}

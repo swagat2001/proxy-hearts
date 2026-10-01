@@ -1,0 +1,49 @@
+{% extends "base.html" %}{% block body %}
+<h1>Agents that date for you.</h1>
+<p class="muted" style="max-width:720px">Paste a public LinkedIn and a public Instagram. An AI agent reads both, builds a profile of the person — needs, hobbies, interests, values —
+then goes out and dates every other agent's person on their behalf. After each date both agents debrief privately, and every person gets a ranking of who fits them best.</p>
+
+<div class="kpi card">
+  <div><b>{{ people|selectattr('status','equalto','ready')|list|length }}</b><span class="muted small">agents ready</span></div>
+  <div><b>{{ n_dates }}</b><span class="muted small">dates completed</span></div>
+  <div><b>{{ round.status }}</b><span class="muted small">dating round</span></div>
+  <div style="margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <form method="post" action="/round"><button class="btn">Run a dating round for everyone</button></form>
+    <a class="btn ghost" href="/rankings">See rankings</a>
+  </div>
+</div>
+
+<div class="two">
+<form class="card" method="post" action="/add">
+  <h2>Add a person</h2>
+  <label>LinkedIn profile URL</label><input name="linkedin" placeholder="https://www.linkedin.com/in/…" required>
+  <label>Public Instagram URL</label><input name="instagram" placeholder="https://www.instagram.com/…" required>
+  <p class="small muted"><label style="display:inline;text-transform:none;letter-spacing:0"><input type="checkbox" name="auto_date" checked style="width:auto"> When the profile is ready, send this agent on dates with the existing pool</label></p>
+  <button class="btn">Create their agent</button>
+  <p class="small muted">Takes ~1–2 minutes: scraping → reading → profile. Only public profiles.</p>
+</form>
+<form class="card" method="post" action="/bulk">
+  <h2>Add many</h2>
+  <label>One person per line: linkedin_url, instagram_url</label>
+  <textarea name="lines" placeholder="https://www.linkedin.com/in/jane-doe, https://www.instagram.com/janedoe"></textarea>
+  <p><button class="btn ghost">Queue them all</button></p>
+</form>
+</div>
+
+<h2 style="margin-top:28px">People ({{ people|length }})</h2>
+<div class="grid" id="people">
+{% for p in people %}
+  <a class="card pcard" href="/person/{{ p.id }}" style="margin:0">
+    <img class="av" src="{{ pic(p) }}" alt="">
+    <div><b>{{ p.name or ('New person' if privacy else p.instagram.split('instagram.com/')[-1].strip('/')) }}</b><br>
+      <span class="status {{ p.status }}" data-pid="{{ p.id }}">{{ p.status }}</span>
+      {% if p.analysis %}<div class="small muted">{{ p.analysis.one_liner }}</div>{% endif %}</div>
+  </a>
+{% else %}<p class="muted">No one yet — add the first person above.</p>{% endfor %}
+</div>
+<script>
+setInterval(async()=>{const r=await fetch('/api/status');const j=await r.json();let reload=false;
+document.querySelectorAll('[data-pid]').forEach(el=>{const p=j.people[el.dataset.pid];if(p&&p.status!==el.textContent){el.textContent=p.status;el.className='status '+p.status;if(p.status==='ready')reload=true}});
+if(reload)setTimeout(()=>location.reload(),600)},3000);
+</script>
+{% endblock %}

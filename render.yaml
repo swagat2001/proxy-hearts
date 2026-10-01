@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: proxy-hearts
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app -w 1 --threads 8 --timeout 180 -b 0.0.0.0:$PORT
+    envVars:
+      - key: APIFY_TOKEN
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: CEREBRAS_API_KEY
+        sync: false
+      - key: LI_ACTORS
+        value: harvestapi~linkedin-profile-scraper:urls,dev_fusion~linkedin-profile-scraper:profileUrls
+      - key: PRIVACY_MODE
+        value: "1"
+      - key: INVITES_PER_AGENT
+        value: "2"
+      - key: DATE_TURNS
+        value: "6"
+      - key: EXCLUDE_PAIRS
+        value: ghazalalagh:varunalagh,nithinkamath:nikhilkamathcio

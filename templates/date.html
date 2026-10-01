@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% block title %}{{ d.a_name }} × {{ d.b_name }}{% endblock %}{% block body %}
+<div class="card hero">
+  <a href="/person/{{ A.id }}"><img class="av lg" src="{{ pic(A) }}"></a>
+  <div style="flex:1;text-align:center;min-width:200px">
+    <h1 style="margin:0">{{ d.a_name }} × {{ d.b_name }}</h1>
+    <p class="muted">{{ (d.plan or {}).venue or 'Planning…' }}{% if (d.plan or {}).city %} · {{ d.plan.city }}{% endif %}</p>
+    <span class="status" id="st">{% if d.status in ['asking','on_date','debrief'] %}<span class="pulse"></span>{% endif %}{{ d.status }}</span>
+  </div>
+  <a href="/person/{{ B.id }}"><img class="av lg" src="{{ pic(B) }}"></a>
+</div>
+
+<div class="card"><h3>The invitation</h3>
+  <p><b>{{ d.a_name }}'s agent:</b> {{ d.reason }}</p>
+  {% if d.invite_reply %}<p><b>{{ d.b_name }}'s agent:</b> “{{ d.invite_reply.reply }}” {% if d.invite_reply.accept %}<span class="tag ok">accepted</span>{% else %}<span class="tag hot">declined</span>{% endif %}</p>{% endif %}
+  {% if d.plan %}<p class="small muted"><b>Why this venue:</b> {{ d.plan.why }}</p>{% endif %}
+</div>
+
+<div class="card"><h3>The date</h3><div class="chat" id="chat">
+{% for m in d.messages %}<div class="bubble {{ 'b' if m.pid==d.b }}"><div class="who">{{ m.name }}</div>{{ m.text }}</div>{% endfor %}
+</div></div>
+
+{% if d.reflection %}<div class="two">
+{% for pid, nm in [(d.a, d.a_name), (d.b, d.b_name)] %}{% set r = d.reflection[pid] %}
+<div class="card"><h3>{{ nm }}'s agent debrief</h3><div class="score">{{ r.overall }}/100 {% if r.second_date %}💞{% endif %}</div>
+<p class="small">Chemistry {{ r.chemistry }} · Values {{ r.values_fit }} · Lifestyle {{ r.lifestyle_fit }} · Fun {{ r.fun }}</p>
+<p><b>Highlight:</b> {{ r.highlight }}</p><p><b>Concern:</b> {{ r.concern }}</p><p class="muted">{{ r.verdict }}</p>
+<p>{% if r.second_date %}<span class="tag ok">wants a second date</span>{% else %}<span class="tag hot">no second date</span>{% endif %}</p></div>
+{% endfor %}</div>{% endif %}
+
+{% if d.status in ['asking','on_date','debrief'] %}
+<script>let n={{ d.messages|length }};setInterval(async()=>{const d=await (await fetch('/api/date/{{ d.id }}')).json();
+if(d.status!=='{{ d.status }}'&&(d.status==='done'||d.status==='declined'||d.status==='on_date'&&n===0)){location.reload();return}
+const c=document.getElementById('chat');while(n<d.messages.length){const m=d.messages[n++];const el=document.createElement('div');
+el.className='bubble'+(m.pid==='{{ d.b }}'?' b':'');el.innerHTML='<div class="who"></div>';el.querySelector('.who').textContent=m.name;el.append(m.text);c.append(el);el.scrollIntoView({behavior:'smooth'})}
+document.getElementById('st').textContent=d.status},1500)</script>{% endif %}
+{% endblock %}
